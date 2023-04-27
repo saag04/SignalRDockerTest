@@ -24,10 +24,6 @@ var app = builder.Build();
 
 app.UseMiddleware<ExceptionMiddleware>();
 
-var scope = app.Services.CreateScope();
-var context = scope.ServiceProvider.GetService<DataContext>();
-context?.Database.Migrate();
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -46,5 +42,19 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+using var scope = app.Services.CreateScope();
+var services = scope.ServiceProvider;
+try
+{
+    var context = services.GetService<DataContext>();
+    context?.Database.Migrate();
+    Seed.SeedUsers(context);
+}
+catch (Exception ex)
+{
+    var logger = services.GetService<ILogger<Program>>();
+    logger.LogError(ex, "An error occured durign migration");
+}
 
 app.Run();
