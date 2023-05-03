@@ -10,24 +10,15 @@ import { User } from './models/user';
 })
 export class AppComponent implements OnInit {
   title = 'SignalR Chat';
-  users: any;
 
   constructor(private http: HttpClient, private accountService: AccountService) {
 
 
   }
   ngOnInit(): void {
-    this.getUsers();
-    this.setCurrentUser();
-  }
+    this.setCurrentUser(); }
 
-  getUsers() {
-    this.http.get('https://localhost:5001/api/users').subscribe({
-      next: response => this.users = response,
-      error: error => console.log('Error: ', error),
-      complete: () => console.log('Request has completed')
-    })
-  }
+  
 
   setCurrentUser() {
     const userString = localStorage.getItem('user');
