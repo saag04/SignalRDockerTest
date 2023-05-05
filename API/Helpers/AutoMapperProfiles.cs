@@ -12,6 +12,9 @@ namespace API.Helpers
             CreateMap<AppUser, MemberDto>()
                 .ForMember(d => d.Age, o => o.MapFrom(s => s.DateOfBirth.CalculateAge()));
             CreateMap<RegisterDto, AppUser>();
+            CreateMap<Message, MessageDto>()
+            .ForMember(d => d.SenderPhotoUrl, o => o.MapFrom(s => s.Sender.PhotoUrl))
+            .ForMember(d => d.RecipientPhotoUrl, o => o.MapFrom(s => s.Recipient.PhotoUrl));
 
         }
     }
