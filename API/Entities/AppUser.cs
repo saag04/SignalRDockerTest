@@ -20,6 +20,8 @@ namespace API.Entities
         public string? Gender { get; set; }
         public string? City { get; set; }
         public string? Country { get; set; }   
-        public string? PhotoUrl { get; set; }       
+        public string? PhotoUrl { get; set; }    
+        public List<Message>? MessagesSent { get; set; }   
+        public List<Message>? MessagesReceived { get; set; }   
     }
 }
