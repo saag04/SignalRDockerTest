@@ -38,19 +38,22 @@ namespace API.Data
             return await _context.Messages.FindAsync(id);
         }
 
-       
+
 
         public Task<PagedList<MessageDto>> GetMessageForUser(MessageParams messageParams)
         {
-             var query = _context.Messages
-            .OrderByDescending(x => x.MessageSent)
-            .AsQueryable();
+            var query = _context.Messages
+           .OrderByDescending(x => x.MessageSent)
+           .AsQueryable();
 
             query = messageParams.Container switch
             {
-                "Inbox" => query.Where(u => u.RecipientUsername == messageParams.Username),
-                "Outbox" => query.Where(u => u.SenderUsername == messageParams.Username),
-                _ => query.Where(u => u.RecipientUsername == messageParams.Username && u.DateRead == null)
+                "Inbox" => query.Where(u => u.RecipientUsername == messageParams.Username
+                    && u.RecipientDeleted == false),
+                "Outbox" => query.Where(u => u.SenderUsername == messageParams.Username
+                    && u.SenderDeleted == false),
+                _ => query.Where(u => u.RecipientUsername == messageParams.Username && u.DateRead == null
+                    && u.RecipientDeleted == false)
             };
 
             var messages = query.ProjectTo<MessageDto>(_mapper.ConfigurationProvider);
@@ -64,11 +67,11 @@ namespace API.Data
             .Include(u => u.Sender)
             .Include(u => u.Recipient)
             .Where(
-                m => m.RecipientUsername == currentUsername &&
+                m => m.RecipientUsername == currentUsername && m.RecipientDeleted == false &&
                 m.SenderUsername == recipientUsername ||
-                m.RecipientUsername == recipientUsername &&
+                m.RecipientUsername == recipientUsername && m.SenderDeleted == false &&
                 m.SenderUsername == currentUsername)
-                .OrderByDescending(m => m.MessageSent)
+                .OrderBy(m => m.MessageSent)
                 .ToListAsync();
 
             var unreadMessages = messages.Where(m => m.DateRead == null

@@ -5,6 +5,7 @@ import { Member } from '../_models/member';
 import { PaginatedResult } from '../_models/pagination';
 import { map } from 'rxjs';
 import { UserParams } from '../_models/userParams';
+import { getPaginatedResult, getPaginationHeaders } from './paginationHelper';
 
 @Injectable({
   providedIn: 'root'
@@ -16,34 +17,9 @@ export class MembersService {
   constructor(private http: HttpClient) { }
 
   getMembers(userParams: UserParams) {   
-    let params = this.getPaginationHeaders(userParams.pageNumber, userParams.pageSize);
-    return this.getPaginatedResult<Member[]>(this.baseUrl + 'users', params);
-  }
-
-  private getPaginatedResult<T>(url: string, params: HttpParams) {
-    const paginatedResult: PaginatedResult<T> = new PaginatedResult<T>();
-    return this.http.get<T>(url, { observe: 'response', params }).pipe(
-      map(response => {
-        if (response.body) {
-          paginatedResult.result = response.body;
-        }
-        const pagination = response.headers.get('Pagination');
-        if (pagination) {
-          paginatedResult.pagination = JSON.parse(pagination);
-        }
-        return paginatedResult;
-      })
-    );
-  }
-
-  private getPaginationHeaders(pageNumber: number, pageSize: number) {
-    let params = new HttpParams();
-    if (pageNumber && pageSize) {
-      params = params.append('pageNumber', pageNumber);
-      params = params.append('pageSize', pageSize);
-    }
-    return params;
-  }
+    let params = getPaginationHeaders(userParams.pageNumber, userParams.pageSize);
+    return getPaginatedResult<Member[]>(this.baseUrl + 'users', params, this.http);
+  }  
 
   getMember(username: string) {
     return this.http.get<Member>(this.baseUrl + 'users/' + username);
